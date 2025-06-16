@@ -1,4 +1,4 @@
-﻿namespace ExeToCpp;
+﻿namespace ExecutableToCppConverter;
 
 public class Parser
 {

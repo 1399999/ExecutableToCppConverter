@@ -1,4 +1,4 @@
-﻿using ExeToCpp;
+﻿using ExecutableToCppConverter;
 
 internal class Program
 {
@@ -22,7 +22,13 @@ internal class Program
                 SystemError.DisplayNoArgumentError(inputVectors[0]);
             }
 
-            else if ((inputVectors[0] == "file" || inputVectors[0] == "run" || inputVectors[0] == "start") && 
+            else if ((inputVectors[0] == "file" || inputVectors[0] == "run" || inputVectors[0] == "start") &&
+                Arguments.CheckForImmediateFileArgument(inputVectors))
+            {
+                Parser.ParseIntoByteArrayAndDisplay(inputVectors[1]);
+            }
+
+            else if ((inputVectors[0] == "file" || inputVectors[0] == "run" || inputVectors[0] == "start") &&
                 Arguments.CheckForImmediateFileArgument(inputVectors))
             {
                 Parser.ParseIntoByteArrayAndDisplay(inputVectors[1]);
@@ -32,6 +38,22 @@ internal class Program
                 Arguments.CheckForFileArgumentFlag(inputVectors) && File.Exists(inputVectors[2]))
             {
                 Parser.ParseIntoByteArrayAndDisplay(inputVectors[2]);
+            }
+
+            else if ((inputVectors[0] == "file" || inputVectors[0] == "run" || inputVectors[0] == "start") &&
+                Arguments.CheckForHelp(inputVectors))
+            {
+                Information.DisplayStartHelp();
+            }
+
+            else if (inputVectors[0] == "help")
+            {
+                Information.DisplayGeneralHelp();
+            }
+
+            else if (inputVectors[0] == "credit" || inputVectors[0] == "credits")
+            {
+                Information.DisplayCredits();
             }
 
             else if (inputVectors[0].Trim() != string.Empty)
