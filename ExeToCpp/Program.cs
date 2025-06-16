@@ -1,4 +1,6 @@
-﻿internal class Program
+﻿using ExeToCpp;
+
+internal class Program
 {
     private static void Main(string[] args)
     {
@@ -7,25 +9,34 @@
         while (true) 
         {
             Console.Write("> ");
-            string input = Console.ReadLine();
+            string[] inputVectors = Console.ReadLine().Trim().Split(' ');
 
-            if (File.Exists(input))
+            if (File.Exists(inputVectors[0]))
             {
-                Console.WriteLine();
+                SystemError.DisplayNoArgumentError(inputVectors[0]);
+            }
 
-                byte[] executableContents = File.ReadAllBytes(input);
+            else if ((inputVectors[0] == "file" || inputVectors[0] == "run" || inputVectors[0] == "start") &&
+                Arguments.CheckForNoArguments(inputVectors))
+            {
+                SystemError.DisplayNoArgumentError(inputVectors[0]);
+            }
 
-                for (int i = 0; i < executableContents.Length; i++)
-                {
-                    Console.Write($"{executableContents[i]} ");
+            else if ((inputVectors[0] == "file" || inputVectors[0] == "run" || inputVectors[0] == "start") && 
+                Arguments.CheckForImmediateFileArgument(inputVectors))
+            {
+                Parser.ParseIntoByteArrayAndDisplay(inputVectors[1]);
+            }
 
-                    if (i % 16 == 15)
-                    {
-                        Console.WriteLine();
-                    }
-                }
+            else if ((inputVectors[0] == "file" || inputVectors[0] == "run" || inputVectors[0] == "start") && 
+                Arguments.CheckForFileArgumentFlag(inputVectors) && File.Exists(inputVectors[2]))
+            {
+                Parser.ParseIntoByteArrayAndDisplay(inputVectors[2]);
+            }
 
-                Console.WriteLine();
+            else if (inputVectors[0].Trim() != string.Empty)
+            {
+                SystemError.DisplayGeneralCommandError(inputVectors[0]);
             }
         }
     }
