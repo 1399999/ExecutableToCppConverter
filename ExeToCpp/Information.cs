@@ -6,8 +6,8 @@ public static class Information
         "\nCommands:\n\n" +
         "clear: Clears the console.\n" +
         "credits: Displays the credits screen.\n" +
-        "exe [-f] [--help]: Buffers the executable file.\n" +
-        "cpp [-f] [--help]: Buffers the C++ file.\n" +
+        "exe [-f] [--help] <file path>: Buffers the executable file.\n" +
+        "cpp [-f] [--help] <file path>: Buffers the C++ file.\n" +
         "start [--help]: Buffers the C++ file.\n" +
         "help: Displays this menu.\n" +
         "\nArguments:\n\n" +

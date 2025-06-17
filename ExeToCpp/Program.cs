@@ -42,10 +42,9 @@ internal class Program
             }
 
             else if ((inputVectors[0] == "exe" || inputVectors[0] == "exec" || inputVectors[0] == "executable") &&
-                Arguments.CheckForImmediateFileArgument(inputVectors))
+                Arguments.CheckForIncorrect2ndArgument(inputVectors))
             {
-                CppFilePath = inputVectors[1];
-                Console.WriteLine($"\nSuccesfully buffered file \"{inputVectors[1]}\"\n");
+                SystemError.DisplayFileDoesNotExistError(inputVectors[1]);
             }
 
             else if ((inputVectors[0] == "cpp") &&
@@ -55,9 +54,10 @@ internal class Program
             }
 
             else if ((inputVectors[0] == "cpp") &&
-                Arguments.CheckForIncorrect2ndArgument(inputVectors))
+                Arguments.CheckForImmediateFileArgument(inputVectors))
             {
-                SystemError.DisplayFileDoesNotExistError(inputVectors[1]);
+                CppFilePath = inputVectors[1];
+                Console.WriteLine($"\nSuccesfully buffered file \"{inputVectors[1]}\"\n");
             }
 
             else if ((inputVectors[0] == "cpp") &&
@@ -77,19 +77,19 @@ internal class Program
             else if ((inputVectors[0] == "start" || inputVectors[0] == "run") &&
                 Arguments.CheckForNoArguments(inputVectors))
             {
-                if (ExeFilePath != string.Empty && CppFilePath != string.Empty)
+                if (!string.IsNullOrEmpty(ExeFilePath) && !string.IsNullOrEmpty(CppFilePath))
                 {
                     Parser.ParseIntoByteArrayAndDisplay(ExeFilePath);
                     Console.WriteLine("<START>");
                     Parser.ParseIntoByteArrayAndDisplay(CppFilePath);
                 }
 
-                else if (ExeFilePath == string.Empty)
+                if (string.IsNullOrEmpty(ExeFilePath))
                 {
                     SystemError.DisplayFileDoesNotExistError("<Executive File Path>");
                 }
 
-                else if (ExeFilePath == string.Empty)
+                if (string.IsNullOrEmpty(CppFilePath))
                 {
                     SystemError.DisplayFileDoesNotExistError("<C++ File Path>");
                 }
