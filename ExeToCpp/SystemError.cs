@@ -8,12 +8,13 @@ public class SystemError
         Console.Write($"\nERROR: ");
 
         Console.ForegroundColor = ConsoleColor.White;
-        Console.Write(message);
+        Console.WriteLine(message);
 
         Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine($"The command is invalid. \nUse the \"help\" command for help.");
+        Console.WriteLine($"The command is invalid. ");
 
         Console.ForegroundColor = ConsoleColor.White;
+        Console.WriteLine("\nUse the \"help\" command for help.\n");
     }
 
     public static void DisplayNoArgumentError(string message)
@@ -25,8 +26,24 @@ public class SystemError
         Console.WriteLine(message);
 
         Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine($"This command does not have necessary arguments required to run it. \nUse the \"help\" command for help.\n");
+        Console.WriteLine($"This command does not have necessary arguments required to run it.");
 
         Console.ForegroundColor = ConsoleColor.White;
+        Console.WriteLine("\nUse the \"help\" command for help.\n");
+    }
+
+    public static void DisplayFileDoesNotExistError(string message)
+    {
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.Write($"\nERROR: ");
+
+        Console.ForegroundColor = ConsoleColor.White;
+        Console.WriteLine(message);
+
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine($"This file does not exist.");
+
+        Console.ForegroundColor = ConsoleColor.White;
+        Console.WriteLine("\nUse the \"help\" command for help.\n");
     }
 }
