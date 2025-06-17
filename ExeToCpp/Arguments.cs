@@ -9,4 +9,5 @@ public class Arguments
         || commandVectors[1] == "--file" || commandVectors[1] == "-i" || commandVectors[1] == "--in" || commandVectors[1] == "--input";
     public static bool CheckForIncorrect2ndArgument(string[] commandVectors) => commandVectors.Length <= 1 ? false : !(commandVectors[1] == "help" 
         || commandVectors[1] == "--help" || commandVectors[1] == "--file" || commandVectors[1] == "-i" || commandVectors[1] == "--in" || commandVectors[1] == "--input");
+    public static bool CheckForTwoFiles(string[] commandVectors) => commandVectors.Length <= 1 ? false : File.Exists(commandVectors[1]) && File.Exists(commandVectors[2]);
 }

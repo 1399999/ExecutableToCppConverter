@@ -9,36 +9,14 @@ public static class SystemNavigator
             NavigateExeCommand(inputVectors);
         }
 
-        if (inputVectors[0] == "cpp")
+        else if (inputVectors[0] == "cpp")
         {
             NavigateCppCommand(inputVectors);
         }
 
-        else if ((inputVectors[0] == "start" || inputVectors[0] == "run") &&
-            Arguments.CheckForNoArguments(inputVectors))
+        else if (inputVectors[0] == "start" || inputVectors[0] == "run")
         {
-            if (!string.IsNullOrEmpty(SystemModel.ExeFilePath) && !string.IsNullOrEmpty(SystemModel.CppFilePath))
-            {
-                Parser.ParseIntoByteArrayAndDisplay(SystemModel.ExeFilePath);
-                Console.WriteLine("<START>");
-                Parser.ParseIntoByteArrayAndDisplay(SystemModel.CppFilePath);
-            }
-
-            if (string.IsNullOrEmpty(SystemModel.ExeFilePath))
-            {
-                SystemError.DisplayFileDoesNotExistError("<Executable File Path>");
-            }
-
-            if (string.IsNullOrEmpty(SystemModel.CppFilePath))
-            {
-                SystemError.DisplayFileDoesNotExistError("<C++ File Path>");
-            }
-        }
-
-        else if ((inputVectors[0] == "start" || inputVectors[0] == "run") &&
-            Arguments.CheckForHelp(inputVectors))
-        {
-            Information.DisplayStartHelp();
+            NavigateStartCommand(inputVectors);
         }
 
         else if (inputVectors[0] == "help")
@@ -53,8 +31,12 @@ public static class SystemNavigator
 
         else if (inputVectors[0] == "clear" || inputVectors[0] == "cls")
         {
-            Console.Clear();
-            return true;
+            Console.Clear(); return true;
+        }
+
+        else if (inputVectors[0] == "test")
+        {
+            Console.WriteLine("\nComing soon... in version 0.0.0.\n");
         }
 
         else if (inputVectors[0].Trim() != string.Empty)
@@ -113,6 +95,41 @@ public static class SystemNavigator
         else if (Arguments.CheckForIncorrect2ndArgument(inputVectors))
         {
             SystemError.DisplayFileDoesNotExistError(inputVectors[1]);
+        }
+    }
+
+    private static void NavigateStartCommand(string[] inputVectors)
+    {
+        if (Arguments.CheckForNoArguments(inputVectors))
+        {
+            if (!string.IsNullOrEmpty(SystemModel.ExeFilePath) && !string.IsNullOrEmpty(SystemModel.CppFilePath))
+            {
+                Parser.ParseIntoByteArrayAndDisplay(SystemModel.ExeFilePath);
+                Console.WriteLine("<START>");
+                Parser.ParseIntoByteArrayAndDisplay(SystemModel.CppFilePath);
+            }
+
+            if (string.IsNullOrEmpty(SystemModel.ExeFilePath))
+            {
+                SystemError.DisplayFileDoesNotExistError("<Executable File Path>");
+            }
+
+            if (string.IsNullOrEmpty(SystemModel.CppFilePath))
+            {
+                SystemError.DisplayFileDoesNotExistError("<C++ File Path>");
+            }
+        }
+
+        else if (Arguments.CheckForTwoFiles(inputVectors))
+        {
+            Parser.ParseIntoByteArrayAndDisplay(inputVectors[1]);
+            Console.WriteLine("<START>");
+            Parser.ParseIntoByteArrayAndDisplay(inputVectors[2]);
+        }
+
+        else if (Arguments.CheckForHelp(inputVectors))
+        {
+            Information.DisplayStartHelp();
         }
     }
 }
