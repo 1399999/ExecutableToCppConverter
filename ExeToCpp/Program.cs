@@ -6,7 +6,7 @@ internal class Program
     {
         Start: { }
 
-        Console.WriteLine("================ Executable to C++ Converter ================\n");
+        Console.WriteLine("================ Executable to C++ Converter - Test 0.0.0 ================\n");
 
         while (true) 
         {

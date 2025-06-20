@@ -36,7 +36,7 @@ public static class SystemNavigator
 
         else if (inputVectors[0] == "test")
         {
-            Console.WriteLine("\nComing soon... in version 0.0.0.\n");
+            Test.Run();
         }
 
         else if (inputVectors[0].Trim() != string.Empty)
