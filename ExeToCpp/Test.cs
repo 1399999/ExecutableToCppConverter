@@ -49,13 +49,25 @@ public static class Test
         f.Grad = 4;
         d.Grad = -2;
         l.Grad = 1;
-        
+        c.Grad = -2;
+        e.Grad = -2;
+
+        a.Data += 0.01 * a.Grad;
+        b.Data += 0.01 * b.Grad;
+        c.Data += 0.01 * c.Grad;
+        f.Data += 0.01 * f.Grad;
+
+        e = a * b;
+        d = e + c;
+        l = f * d;
+
+        Console.WriteLine($"l.Data: {l.Data}\n");
+
         a = new Value(2, 'a');
         b = new Value(-3, 'b');
         c = new Value(10, 'c');
         e = a * b; e.Label = 'e';
         d = e + c; d.Label = 'd';
-        d.Data += h;
         f = new Value(-2, 'f');
         l = f * d; l.Label = 'l';
         var l2 = l.Data;
