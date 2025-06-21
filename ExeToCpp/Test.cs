@@ -36,13 +36,13 @@ public static class Test
         //Console.WriteLine($"Value Class(-3) = {new Value(-3)}");
         //Console.WriteLine($"Value Class(-3) = {new Value(-3) * new Value(2) + new Value(10)}\n");
 
-        var a = new Value(2, 'a');
-        var b = new Value(-3, 'b');
-        var c = new Value(10, 'c');
-        var e = a * b; e.Label = 'e';
-        var d = e + c; d.Label = 'd';
-        var f = new Value(-2, 'f');
-        var l = f * d; l.Label = 'l';
+        var a = new Value(2, label: "a");
+        var b = new Value(-3, label: "b");
+        var c = new Value(10, label: "c");
+        var e = a * b; e.Label ="e";
+        var d = e + c; d.Label = "d";
+        var f = new Value(-2, label: "f");
+        var l = f * d; l.Label = "l";
         var l1 = l.Data;
 
         double h = 0.0001;
@@ -61,47 +61,108 @@ public static class Test
         d = e + c;
         l = f * d;
 
-        Console.WriteLine($"l.Data: {l.Data}\n");
+        Console.WriteLine($"l.Data: {l.Data}");
 
-        a = new Value(2, 'a');
-        b = new Value(-3, 'b');
-        c = new Value(10, 'c');
-        e = a * b; e.Label = 'e';
-        d = e + c; d.Label = 'd';
-        f = new Value(-2, 'f');
-        l = f * d; l.Label = 'l';
+        a = new Value(2, label: "a");
+        b = new Value(-3, label: "b");
+        c = new Value(10, label: "c");
+        e = a * b; e.Label = "e";
+        d = e + c; d.Label = "d";
+        f = new Value(-2, label: "f");
+        l = f * d; l.Label = "l";
         var l2 = l.Data;
 
         // Calculus: dz/dx = (dz/dy)*(dy/dx).
 
-        Console.WriteLine($"Derivitive of a Value Class: {(l2-l1)/h}\n");
+        Console.WriteLine($"Derivitive of a Value Class: {(l2-l1)/h}");
+
+        // ####################
+        // ## NEURON EXAMPLE ##
+        // ####################
+
+        // Inputs: x1, x2.
+        Value x1 = new Value(2, label: "x1");
+        Value x2 = new Value(0, label: "x2");
+
+        // Weights: w1, w2.
+        Value w1 = new Value(-3, label: "w1");
+        Value w2 = new Value(1, label: "w2");
+
+        // Bias: b
+        b = new Value(6.8813735870195432, label: "b");
+
+        // For all of the below: x1w1 + x2w2 + b.
+        Value x1w1 = x1 * w1; x1w1.Label = "x1*w1";
+        Value x2w2 = x2 * w2; x2w2.Label = "x2*w2";
+
+        Value x1w1x2w2 = x1w1 + x2w2; x1w1x2w2.Label = "x1*w1 + x2*w2";
+        Value n = x1w1x2w2 + b; n.Label = "n";
+
+        Value o = n.TanH(); o.Label = "o";
+
+        Console.WriteLine($"Output of tan(h): {o}\n");
+
+        x1w1.Grad = 0.5;
+        x2w2.Grad = 0.5;
+        x1w1x2w2.Grad = 0.5;
+        b.Grad = 0.5;
+        n.Grad = 0.5;
+        o.Grad = 1;
+
+        x1.Grad = w1.Grad * x1w1.Grad;
+        w1.Grad = x1.Grad * x1w1.Grad;
+
+        w2.Grad = w2.Data * x2w2.Grad;
+        x2.Grad = x2.Data * x2w2.Grad;
     }
 }
 
 public class Value
 {
     public double Data { get; set; }
-    public (Value, Value) Prev { get; set; }
+    public (Value, Value?) Prev { get; set; }
     public char Op { get; set; }
-    public char Label { get; set; }
+    public string Label { get; set; } = string.Empty;
     public double Grad { get; set; } = 0;
+    public double Backward { get; set; } = 0;
 
-    public Value(double data) => Data = data;
-    public Value(double data, char label)
-    {
-        Data = data;
-        Label = label;
-    }
-
-    public Value(double data, (Value, Value) children, char op)
+    public Value(double data, (Value, Value?) children, char op = char.MinValue, string label = "")
     {
         Data = data;
         Prev = children;
+        Label = label;
         Op = op;
+        Backward = 0;
+    }
+
+    public Value(double data, char op = char.MinValue, string label = "")
+    {
+        Data = data;
+        Label = label;
+        Op = op;
+        Backward = 0;
     }
 
     public override string ToString() => Data.ToString();
 
-    public static Value operator + (Value value1, Value value2) => new Value(value1.Data + value2.Data, (value1, value2), '+');
+    public static Value operator + (Value value1, Value value2) 
+    {
+        var output =  new Value(value1.Data + value2.Data, (value1, value2), '+');
+        output.Backward = value1.Backward;
+
+        return output;
+    }
     public static Value operator * (Value value1, Value value2) => new Value(value1.Data * value2.Data, (value1, value2), '*');
+
+    public Value TanH()
+    {
+        double n = Data;
+        var t = (Math.Exp(2 * n) - 1) / (Math.Exp(2 * n) + 1);
+        return new Value(t, (this, null), label: "tanh");
+    }
+
+    public void Backward1()
+    {
+
+    }
 }
