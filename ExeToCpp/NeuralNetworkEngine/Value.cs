@@ -66,6 +66,10 @@ public class Value
         return output;
     }
 
+    public static Value operator /(Value self, Value other) => self * other ^ -1;
+    public static Value operator -(Value self, Value other) => self + (other * -1);
+    public static Value operator -(Value self) => self * -1;
+
     public Value Relu()
     {
         Value output = new Value(Data < 0 ? 0 : Data, new List<Value>(1) { this }, "ReLU");
@@ -115,5 +119,10 @@ public class Value
 
             grandList.Add(value);
         }
+    }
+
+    public override string ToString()
+    {
+        return $"Value(Data: {Data}, Grad: {Grad}, Op: {Op}, Prev Count: {(Prev != null ? Prev.Count : 0)})";
     }
 }
