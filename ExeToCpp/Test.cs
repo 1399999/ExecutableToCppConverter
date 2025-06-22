@@ -46,11 +46,11 @@ public static class Test
         var l1 = l.Data;
 
         double h = 0.0001;
-        f.Grad = 4;
-        d.Grad = -2;
-        l.Grad = 1;
-        c.Grad = -2;
-        e.Grad = -2;
+        //f.Grad = 4;
+        //d.Grad = -2;
+        //l.Grad = 1;
+        //c.Grad = -2;
+        //e.Grad = -2;
 
         a.Data += 0.01 * a.Grad;
         b.Data += 0.01 * b.Grad;
@@ -102,29 +102,35 @@ public static class Test
 
         Console.WriteLine($"Output of tan(h): {o}\n");
 
-        x1w1.Grad = 0.5;
-        x2w2.Grad = 0.5;
-        x1w1x2w2.Grad = 0.5;
-        b.Grad = 0.5;
-        n.Grad = 0.5;
-        o.Grad = 1;
+        //o.BackwardTan();
 
-        x1.Grad = w1.Grad * x1w1.Grad;
-        w1.Grad = x1.Grad * x1w1.Grad;
+        //x1w1.Grad = 0.5;
+        //x2w2.Grad = 0.5;
+        //x1w1x2w2.Grad = 0.5;
+        //b.Grad = 0.5;
+        //n.Grad = 0.5;
+        //o.Grad = 1;
 
-        w2.Grad = w2.Data * x2w2.Grad;
-        x2.Grad = x2.Data * x2w2.Grad;
+        //x1.Grad = w1.Grad * x1w1.Grad;
+        //w1.Grad = x1.Grad * x1w1.Grad;
+
+        //w2.Grad = w2.Data * x2w2.Grad;
+        //x2.Grad = x2.Data * x2w2.Grad;
     }
 }
 
 public class Value
 {
+    public delegate void BackwardFunction(Value value1, Value value2, Value value3);
+    public delegate void BackwardTanHFunction(Value self, Value output, int t);
+
     public double Data { get; set; }
     public (Value, Value?) Prev { get; set; }
     public char Op { get; set; }
     public string Label { get; set; } = string.Empty;
     public double Grad { get; set; } = 0;
-    public double Backward { get; set; } = 0;
+    public BackwardFunction? BackwardOperation { get; set; }
+    public BackwardTanHFunction? BackwardTan { get; set; }
 
     public Value(double data, (Value, Value?) children, char op = char.MinValue, string label = "")
     {
@@ -132,7 +138,8 @@ public class Value
         Prev = children;
         Label = label;
         Op = op;
-        Backward = 0;
+        BackwardOperation = null;
+        BackwardTan = null;
     }
 
     public Value(double data, char op = char.MinValue, string label = "")
@@ -140,7 +147,8 @@ public class Value
         Data = data;
         Label = label;
         Op = op;
-        Backward = 0;
+        BackwardOperation = null;
+        BackwardTan = null;
     }
 
     public override string ToString() => Data.ToString();
@@ -148,21 +156,43 @@ public class Value
     public static Value operator + (Value value1, Value value2) 
     {
         var output =  new Value(value1.Data + value2.Data, (value1, value2), '+');
-        output.Backward = value1.Backward;
+        output.BackwardOperation = BackwardAdd;
 
         return output;
     }
-    public static Value operator * (Value value1, Value value2) => new Value(value1.Data * value2.Data, (value1, value2), '*');
+
+    public static Value operator * (Value value1, Value value2) 
+    {
+        var output = new Value(value1.Data * value2.Data, (value1, value2), '*');
+        output.BackwardOperation = BackwardMul;
+
+        return output;
+    }
 
     public Value TanH()
     {
         double n = Data;
         var t = (Math.Exp(2 * n) - 1) / (Math.Exp(2 * n) + 1);
+
+        BackwardTan = BackwardTanh;
+
         return new Value(t, (this, null), label: "tanh");
     }
 
-    public void Backward1()
+    static void BackwardAdd(Value self, Value other, Value output)
     {
+        self.Grad = 1.0 * output.Grad;
+        other.Grad = 1.0 * output.Grad;
+    }
 
+    static void BackwardMul(Value self, Value other, Value output)
+    {
+        self.Grad = 1.0 * other.Data * output.Grad;
+        other.Grad = 1.0 * self.Data * output.Grad;
+    }
+
+    static void BackwardTanh(Value self, Value output, int t)
+    {
+        self.Grad = (1 - Math.Pow(t, 2)) * output.Grad;
     }
 }
