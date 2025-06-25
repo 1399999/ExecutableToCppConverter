@@ -6,12 +6,21 @@ internal class Program
     {
         Start: { }
 
-        Console.WriteLine("================ Executable to C++ Converter - Test 0.0.0 ================\n");
+        Console.WriteLine("================ Executable to C++ Converter - Test ================\n");
 
         while (true) 
         {
             Console.Write("> ");
-            string[] inputVectors = Console.ReadLine().Trim().Split(' ');
+
+            string? tempInput = Console.ReadLine();
+
+            if (tempInput == null)
+            {
+                SystemError.DisplayMysteryError();
+                continue;
+            }
+
+            string[] inputVectors = tempInput.Trim().Split(' ');
 
             if (SystemNavigator.Navigate(inputVectors) == true)
             {

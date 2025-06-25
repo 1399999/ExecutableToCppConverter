@@ -46,4 +46,16 @@ public class SystemError
         Console.ForegroundColor = ConsoleColor.White;
         Console.WriteLine("\nUse the \"help\" command for help.\n");
     }
+
+    public static void DisplayMysteryError()
+    {
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.Write($"\nERROR: ");
+
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine($"Do not know how you got to this error.");
+
+        Console.ForegroundColor = ConsoleColor.White;
+        Console.WriteLine("\nUse the \"help\" command for help.\n");
+    }
 }
