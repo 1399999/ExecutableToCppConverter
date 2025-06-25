@@ -1,4 +1,5 @@
-﻿namespace ExecutableToCppConverter;
+﻿
+namespace ExecutableToCppConverter;
 
 public static class SystemNavigator
 {
@@ -36,7 +37,7 @@ public static class SystemNavigator
 
         else if (inputVectors[0] == "test")
         {
-            Test.Run();
+            NavigateTestCommand(inputVectors);
         }
 
         else if (inputVectors[0].Trim() != string.Empty)
@@ -46,6 +47,8 @@ public static class SystemNavigator
 
         return null;
     }
+
+    
 
     private static void NavigateExeCommand(string[] inputVectors)
     {
@@ -130,6 +133,30 @@ public static class SystemNavigator
         else if (Arguments.CheckForHelp(inputVectors))
         {
             Information.DisplayStartHelp();
+        }
+    }
+
+    private static void NavigateTestCommand(string[] inputVectors)
+    {
+        if (Arguments.CheckForNoArguments(inputVectors))
+        {
+            Test.RunTest1();
+            Test.RunTest2();
+        }
+
+        else if (inputVectors[1] == "1")
+        {
+            Test.RunTest1();
+        }
+
+        else if (inputVectors[1] == "2" && Arguments.CheckForNoArgumentsAfter(inputVectors, 1))
+        {
+            Test.RunTest2();
+        }
+
+        else if (inputVectors[1] == "2" && Arguments.CheckForImmediateFileArgument(inputVectors))
+        {
+            Test.RunTest2(inputVectors[2]);
         }
     }
 }

@@ -29,4 +29,17 @@ public static class Test
         Console.WriteLine($"h: {h}");
         Console.WriteLine($"y: {y}\n");
     }
+    public static void RunTest2(string? filePath = null)
+    {
+        string[] lines = File.ReadAllLines(filePath != null ? filePath : "C:\\ExecutableToCpp\\Test\\Names.txt");
+
+        Console.WriteLine($"\nLines: {lines.Length}");
+        Console.WriteLine($"Min length word: {lines.OrderBy(x => x.Length).ToList()[0]}");
+        Console.WriteLine($"Max length word: {lines.OrderByDescending(x => x.Length).ToList()[0]}\n");
+
+        foreach (string name in lines) 
+        {
+
+        }
+    }
 }
