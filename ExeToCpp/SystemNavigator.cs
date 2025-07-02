@@ -140,7 +140,12 @@ public static class SystemNavigator
     {
         if (Arguments.CheckForNoArguments(inputVectors))
         {
+            Console.WriteLine("================ Test 1 ================");
+
             Test.RunTest1();
+
+            Console.WriteLine("================ Test 2 ================");
+
             Test.RunTest2();
         }
 
