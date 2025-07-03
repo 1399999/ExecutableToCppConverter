@@ -1,6 +1,4 @@
-﻿using System.Globalization;
-using System.Linq;
-using ExecutableToCppConverter.NeuralNetworkEngine;
+﻿using ExecutableToCppConverter.NeuralNetworkEngine;
 using TorchSharp;
 using static TorchSharp.torch;
 
@@ -10,6 +8,7 @@ public static class Test
 {
     private static readonly string STARTING_TOKEN = "<S>";
     private static readonly string ENDING_TOKEN = "<E>";
+    private static readonly char SPLIT_TOKEN = '.';
     private static readonly int TEMP_WORDS_USED = 32033;
 
     public static void RunTest1()   
@@ -231,20 +230,158 @@ public static class Test
         Console.WriteLine("\n");
     }
 
-    public static int[][] Fill2DArray(int xDimension, int yDimension, int value)
+    public static void RunTest3(string? filePath = null)
     {
-        int[][] output = new int[xDimension][];
+        Console.WriteLine();
 
-        for (int i = 0; i < xDimension; i++)
+        string[] lines = File.ReadAllLines(filePath != null ? filePath : "C:\\ExecutableToCpp\\Test\\Names.txt");
+
+        //Console.WriteLine($"\nLines: {lines.Length}");
+        //Console.WriteLine($"Min length word: {lines.OrderBy(x => x.Length).ToList()[0]}");
+        //Console.WriteLine($"Max length word: {lines.OrderByDescending(x => x.Length).ToList()[0]}\n");
+
+        List<string> tempTokenMap = new List<string>();
+        List<string> tokenMap = new List<string>();
+
+        foreach (string name in lines)
         {
-            output[i] = new int[yDimension];
+            tempTokenMap.Add(STARTING_TOKEN);
 
-            for (int j = 0; j < yDimension; j++)
+            for (int i = 0; i < name.Length; i++)
             {
-                output[i][j] = value;
+                tempTokenMap.Add(name[i].ToString());
+            }
+
+            tempTokenMap.Add(ENDING_TOKEN);
+        }
+
+        for (int i = 0; i < tempTokenMap.Count - 1; i++)
+        {
+            if (tempTokenMap[i] != ENDING_TOKEN)
+            {
+                tokenMap.Add($"{tempTokenMap[i]} {tempTokenMap[i + 1]}");
             }
         }
 
-        return output;
+        var sortedFrequencies = torch.zeros(27, 27, dtype: int32);
+
+        Dictionary<string, int> tokenFrequencyDictionary = new();
+
+        for (int i = 0; i < tokenMap.Count; i++)
+        {
+            if (!tokenFrequencyDictionary.ContainsKey(tokenMap[i]))
+            {
+                tokenFrequencyDictionary.Add(tokenMap[i], 1);
+            }
+
+            else
+            {
+                tokenFrequencyDictionary[tokenMap[i]]++;
+            }
+        }
+
+        //for (int i = 0; i < tokenFrequencyDictionary.Count; i++)
+        //{
+        //    Console.WriteLine($"{{{tokenFrequencyDictionary.Keys.ToList()[i]}}}: {tokenFrequencyDictionary.Values.ToList()[i]}");
+        //}
+
+        char[] alphabet = new char[27]
+        {
+            SPLIT_TOKEN, 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'
+        };
+
+        foreach (string item in lines)
+        {
+            List<char> chs = new List<char>();
+
+            chs.Add('.');
+            chs.AddRange(item.ToCharArray());
+            chs.Add('.');
+
+            for (int i = 1; i < chs.Count; i++)
+            {
+                int xIndex = FindIndex(alphabet, chs[i - 1]);
+                int yIndex = FindIndex(alphabet, chs[i]);
+
+                sortedFrequencies[xIndex, yIndex] += 1;
+            }
+        }
+
+        var p = torch.zeros(27, dtype: float32);
+
+        int sum = (int)sortedFrequencies[0].sum();
+
+        for (int i = 0; i < 27; i++)
+        {
+            p[i] = sortedFrequencies[0, i] / sum;
+        }
+
+        //for (int i = 0; i < p.size()[0]; i++)
+        //{
+        //    Console.WriteLine(p[i].item<float>());
+        //}
+
+        var generator = new Generator(device: device("cpu")).manual_seed(int.MaxValue);
+
+        long index = multinomial(p, 1, true, generator).item<long>();
+
+        Console.WriteLine(alphabet[index]);
+
+        p = torch.rand(3, generator: generator);
+        p = p / p.sum();
+
+        Console.WriteLine(p[0].item<float>() + " " + p[1].item<float>() + " " + p[2].item<float>());
+
+        var p2 = torch.zeros(27, 27, dtype: float32);
+
+        var addN = sortedFrequencies + 1;
+
+        for (int i = 0; i < p2.size()[0]; i++)
+        {
+            for (int j = 0; j < p2[i].size()[0]; j++)
+            {
+                p2[i][j] = addN[i][j];
+            }
+        }
+
+        p2 /= p2.sum(1, true);
+
+        generator = new Generator(device: device("cpu")).manual_seed(int.MaxValue);
+
+        for (int i = 0; i < 200; i++)
+        {
+            index = 0;
+            string output = string.Empty;
+
+            while (true)
+            {
+                p = p2[index];
+
+                index = multinomial(p, 1, true, generator).item<long>();
+                output += alphabet[index];
+
+                if (index == 0)
+                {
+                    break;
+                }
+            }
+
+            Console.WriteLine(output);
+        }
+
+        Console.WriteLine();
+    }
+
+    public static int FindIndex(char[] list, char character)
+    {
+        for (int i = 0; i < list.Length; i++)
+        {
+            if (list[i] == character)
+            {
+                return i;
+            }
+        }
+
+        return 0;
     }
 }

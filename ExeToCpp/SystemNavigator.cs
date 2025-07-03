@@ -147,6 +147,10 @@ public static class SystemNavigator
             Console.WriteLine("================ Test 2 ================");
 
             Test.RunTest2();
+
+            Console.WriteLine("================ Test 3 ================");
+
+            Test.RunTest3();
         }
 
         else if (inputVectors[1] == "1")
@@ -162,6 +166,16 @@ public static class SystemNavigator
         else if (inputVectors[1] == "2" && Arguments.CheckForImmediateFileArgument(inputVectors))
         {
             Test.RunTest2(inputVectors[2]);
+        }
+
+        else if (inputVectors[1] == "3" && Arguments.CheckForNoArgumentsAfter(inputVectors, 1))
+        {
+            Test.RunTest3();
+        }
+
+        else if (inputVectors[1] == "3" && Arguments.CheckForImmediateFileArgument(inputVectors))
+        {
+            Test.RunTest3(inputVectors[2]);
         }
     }
 }
