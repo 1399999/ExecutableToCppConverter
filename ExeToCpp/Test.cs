@@ -1,4 +1,5 @@
-﻿using ExecutableToCppConverter.NeuralNetworkEngine;
+﻿using System.Text.Json;
+using ExecutableToCppConverter.NeuralNetworkEngine;
 using TorchSharp;
 using static TorchSharp.torch;
 
@@ -230,60 +231,31 @@ public static class Test
         Console.WriteLine("\n");
     }
 
+    // 2.1 not 3.
     public static void RunTest3(string? filePath = null)
     {
         Console.WriteLine();
 
+        List<string> files = Directory.EnumerateFiles(SystemModel.DirectoryPath).ToList();
+
+        int highestInt = int.MinValue;
+
+        foreach (string file in files)
+        {
+            if (int.Parse(file.Split('\\')[^1].Split('.')[0].Substring(3)) > highestInt)
+            {
+                highestInt = int.Parse(file.Split('\\')[^1].Split('.')[0].Substring(3));
+            }
+        }
+
+        SystemModel.LogFileProperty.TestNumber = "2.1";
+        SystemModel.LogFileProperty.Times.Add("Start", DateTime.Now);
+
         string[] lines = File.ReadAllLines(filePath != null ? filePath : "C:\\ExecutableToCpp\\Test\\Names.txt");
 
-        //Console.WriteLine($"\nLines: {lines.Length}");
-        //Console.WriteLine($"Min length word: {lines.OrderBy(x => x.Length).ToList()[0]}");
-        //Console.WriteLine($"Max length word: {lines.OrderByDescending(x => x.Length).ToList()[0]}\n");
-
-        List<string> tempTokenMap = new List<string>();
-        List<string> tokenMap = new List<string>();
-
-        foreach (string name in lines)
-        {
-            tempTokenMap.Add(STARTING_TOKEN);
-
-            for (int i = 0; i < name.Length; i++)
-            {
-                tempTokenMap.Add(name[i].ToString());
-            }
-
-            tempTokenMap.Add(ENDING_TOKEN);
-        }
-
-        for (int i = 0; i < tempTokenMap.Count - 1; i++)
-        {
-            if (tempTokenMap[i] != ENDING_TOKEN)
-            {
-                tokenMap.Add($"{tempTokenMap[i]} {tempTokenMap[i + 1]}");
-            }
-        }
+        SystemModel.LogFileProperty.Times.Add("File Loaded", DateTime.Now);
 
         var sortedFrequencies = torch.zeros(27, 27, dtype: int32);
-
-        Dictionary<string, int> tokenFrequencyDictionary = new();
-
-        for (int i = 0; i < tokenMap.Count; i++)
-        {
-            if (!tokenFrequencyDictionary.ContainsKey(tokenMap[i]))
-            {
-                tokenFrequencyDictionary.Add(tokenMap[i], 1);
-            }
-
-            else
-            {
-                tokenFrequencyDictionary[tokenMap[i]]++;
-            }
-        }
-
-        //for (int i = 0; i < tokenFrequencyDictionary.Count; i++)
-        //{
-        //    Console.WriteLine($"{{{tokenFrequencyDictionary.Keys.ToList()[i]}}}: {tokenFrequencyDictionary.Values.ToList()[i]}");
-        //}
 
         char[] alphabet = new char[27]
         {
@@ -307,6 +279,8 @@ public static class Test
             }
         }
 
+        SystemModel.LogFileProperty.Times.Add("Added Tokens", DateTime.Now);
+
         var p = torch.zeros(27, dtype: float32);
 
         int sum = (int)sortedFrequencies[0].sum();
@@ -315,6 +289,8 @@ public static class Test
         {
             p[i] = sortedFrequencies[0, i] / sum;
         }
+
+        SystemModel.LogFileProperty.Times.Add("Converted To Percentages", DateTime.Now);
 
         //for (int i = 0; i < p.size()[0]; i++)
         //{
@@ -325,12 +301,14 @@ public static class Test
 
         long index = multinomial(p, 1, true, generator).item<long>();
 
-        Console.WriteLine(alphabet[index]);
+        //Console.WriteLine(alphabet[index]);
 
         p = torch.rand(3, generator: generator);
         p = p / p.sum();
 
-        Console.WriteLine(p[0].item<float>() + " " + p[1].item<float>() + " " + p[2].item<float>());
+        SystemModel.LogFileProperty.Times.Add("Creates A Generator", DateTime.Now);
+
+        //Console.WriteLine(p[0].item<float>() + " " + p[1].item<float>() + " " + p[2].item<float>());
 
         var p2 = torch.zeros(27, 27, dtype: float32);
 
@@ -345,6 +323,8 @@ public static class Test
         }
 
         p2 /= p2.sum(1, true);
+
+        SystemModel.LogFileProperty.Times.Add("Start of Word Generation", DateTime.Now);
 
         generator = new Generator(device: device("cpu")).manual_seed(int.MaxValue);
 
@@ -368,6 +348,11 @@ public static class Test
 
             Console.WriteLine(output);
         }
+
+        SystemModel.LogFileProperty.Times.Add("End of Word Generation", DateTime.Now);
+        SystemModel.LogFileProperty.Times.Add("End", DateTime.Now);
+
+        File.WriteAllText($"{SystemModel.DirectoryPath}\\Log{highestInt + 1}.txt", JsonSerializer.Serialize(SystemModel.LogFileProperty, new JsonSerializerOptions { WriteIndented = true }));
 
         Console.WriteLine();
     }
