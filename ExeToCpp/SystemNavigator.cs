@@ -155,6 +155,10 @@ public static class SystemNavigator
             Console.WriteLine("================ Test 2.2 ================");
 
             Test.RunTest4();
+
+            Console.WriteLine("================ Test 2.3 ================");
+
+            Test.RunTest5();
         }
 
         else if (inputVectors[1] == "1")
@@ -180,6 +184,11 @@ public static class SystemNavigator
         else if (inputVectors[1] == "2.2" && Arguments.CheckForNoArgumentsAfter(inputVectors, 1))
         {
             Test.RunTest4();
+        }
+
+        else if (inputVectors[1] == "2.3" && Arguments.CheckForNoArgumentsAfter(inputVectors, 1))
+        {
+            Test.RunTest5();
         }
     }
 }

@@ -373,4 +373,68 @@ public static class Test
 
         Console.WriteLine();
     }
+
+    // 2.3 not 5.
+    public static void RunTest5(string? filePath = null)
+    {
+        Console.WriteLine();
+
+        string[] lines = File.ReadAllLines(filePath != null ? filePath : "C:\\ExecutableToCpp\\Test\\Names.txt");
+
+        var sortedFrequencies = torch.zeros(27, 27, dtype: int32);
+
+        foreach (string item in lines)
+        {
+            List<char> chs = new List<char>();
+
+            chs.Add(SPLIT_TOKEN);
+            chs.AddRange(item.ToCharArray());
+            chs.Add(SPLIT_TOKEN);
+
+            for (int i = 1; i < chs.Count; i++)
+            {
+                int xIndex = ALPHABET.FindIndex(chs[i - 1]);
+                int yIndex = ALPHABET.FindIndex(chs[i]);
+
+                sortedFrequencies[xIndex, yIndex] += 1;
+            }
+        }
+
+        var p = torch.zeros(27, dtype: float32);
+        var p2 = (sortedFrequencies + 1).ToFloat(27, 27);
+        p2 /= p2.sum(1, true);
+
+        float logLikelihood = 0;
+        int counter = 0;
+
+        for (int i = 0; i < lines.Length; i++)
+        {
+            List<char> chs = new List<char>();
+
+            chs.Add(SPLIT_TOKEN);
+            chs.AddRange(lines[i].ToCharArray());
+            chs.Add(SPLIT_TOKEN);
+
+            for (int j = 1; j < chs.Count; j++)
+            {
+                int xIndex = ALPHABET.FindIndex(chs[j - 1]);
+                int yIndex = ALPHABET.FindIndex(chs[j]);
+
+                float prob = p2[xIndex, yIndex].item<float>();
+                float logProb = log(prob).item<float>();
+
+                logLikelihood += logProb;
+                counter++;
+
+                if (i <= 100)
+                {
+                    Console.WriteLine($"{ALPHABET[xIndex]}{ALPHABET[yIndex]} {prob} {logProb}");
+                }
+            }
+        }
+
+        Console.WriteLine("\n" + ((0 - logLikelihood) / counter));
+
+        Console.WriteLine();
+    }
 }
