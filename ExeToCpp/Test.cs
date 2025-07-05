@@ -357,6 +357,133 @@ public static class Test
         Console.WriteLine();
     }
 
+
+    // 2.2 not 4.
+    public static void RunTest4(string? filePath = null)
+    {
+        Console.WriteLine();
+
+        List<string> files = Directory.EnumerateFiles(SystemModel.DirectoryPath).ToList();
+
+        int highestInt = int.MinValue;
+
+        foreach (string file in files)
+        {
+            if (int.Parse(file.Split('\\')[^1].Split('.')[0].Substring(3)) > highestInt)
+            {
+                highestInt = int.Parse(file.Split('\\')[^1].Split('.')[0].Substring(3));
+            }
+        }
+
+        SystemModel.LogFileProperty.TestNumber = "2.2";
+        SystemModel.LogFileProperty.Times.Add("Start", DateTime.Now);
+
+        string[] lines = File.ReadAllLines(filePath != null ? filePath : "C:\\ExecutableToCpp\\Test\\Names.txt");
+
+        SystemModel.LogFileProperty.Times.Add("File Loaded", DateTime.Now);
+
+        var sortedFrequencies = torch.zeros(27, 27, dtype: int32);
+
+        char[] alphabet = new char[27]
+        {
+            SPLIT_TOKEN, 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'
+        };
+
+        foreach (string item in lines)
+        {
+            List<char> chs = new List<char>();
+
+            chs.Add('.');
+            chs.AddRange(item.ToCharArray());
+            chs.Add('.');
+
+            for (int i = 1; i < chs.Count; i++)
+            {
+                int xIndex = FindIndex(alphabet, chs[i - 1]);
+                int yIndex = FindIndex(alphabet, chs[i]);
+
+                sortedFrequencies[xIndex, yIndex] += 1;
+            }
+        }
+
+        SystemModel.LogFileProperty.Times.Add("Added Tokens", DateTime.Now);
+
+        var p = torch.zeros(27, dtype: float32);
+
+        int sum = (int)sortedFrequencies[0].sum();
+
+        for (int i = 0; i < 27; i++)
+        {
+            p[i] = sortedFrequencies[0, i] / sum;
+        }
+
+        SystemModel.LogFileProperty.Times.Add("Converted To Percentages", DateTime.Now);
+
+        //for (int i = 0; i < p.size()[0]; i++)
+        //{
+        //    Console.WriteLine(p[i].item<float>());
+        //}
+
+        var generator = new Generator(device: device("cpu")).manual_seed(int.MaxValue);
+
+        long index = multinomial(p, 1, true, generator).item<long>();
+
+        //Console.WriteLine(alphabet[index]);
+
+        p = torch.rand(3, generator: generator);
+        p = p / p.sum();
+
+        SystemModel.LogFileProperty.Times.Add("Creates A Generator", DateTime.Now);
+
+        //Console.WriteLine(p[0].item<float>() + " " + p[1].item<float>() + " " + p[2].item<float>());
+
+        var p2 = torch.zeros(27, 27, dtype: float32);
+
+        var addN = sortedFrequencies + 1;
+
+        for (int i = 0; i < p2.size()[0]; i++)
+        {
+            for (int j = 0; j < p2[i].size()[0]; j++)
+            {
+                p2[i][j] = addN[i][j];
+            }
+        }
+
+        p2 /= p2.sum(1, true);
+
+        SystemModel.LogFileProperty.Times.Add("Start of Word Generation", DateTime.Now);
+
+        generator = new Generator(device: device("cpu")).manual_seed(int.MaxValue);
+
+        for (int i = 0; i < 200; i++)
+        {
+            index = 0;
+            string output = string.Empty;
+
+            while (true)
+            {
+                p = torch.ones(27) / 27F;
+
+                index = multinomial(p, 1, true, generator).item<long>();
+                output += alphabet[index];
+
+                if (index == 0)
+                {
+                    break;
+                }
+            }
+
+            Console.WriteLine(output);
+        }
+
+        SystemModel.LogFileProperty.Times.Add("End of Word Generation", DateTime.Now);
+        SystemModel.LogFileProperty.Times.Add("End", DateTime.Now);
+
+        File.WriteAllText($"{SystemModel.DirectoryPath}\\Log{highestInt + 1}.txt", JsonSerializer.Serialize(SystemModel.LogFileProperty, new JsonSerializerOptions { WriteIndented = true }));
+
+        Console.WriteLine();
+    }
+
     public static int FindIndex(char[] list, char character)
     {
         for (int i = 0; i < list.Length; i++)

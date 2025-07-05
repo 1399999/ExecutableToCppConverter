@@ -148,9 +148,13 @@ public static class SystemNavigator
 
             Test.RunTest2();
 
-            Console.WriteLine("================ Test 3 ================");
+            Console.WriteLine("================ Test 2.1 ================");
 
             Test.RunTest3();
+
+            Console.WriteLine("================ Test 2.2 ================");
+
+            Test.RunTest4();
         }
 
         else if (inputVectors[1] == "1")
@@ -168,14 +172,14 @@ public static class SystemNavigator
             Test.RunTest2(inputVectors[2]);
         }
 
-        else if (inputVectors[1] == "3" && Arguments.CheckForNoArgumentsAfter(inputVectors, 1))
+        else if (inputVectors[1] == "2.1" && Arguments.CheckForNoArgumentsAfter(inputVectors, 1))
         {
             Test.RunTest3();
         }
 
-        else if (inputVectors[1] == "3" && Arguments.CheckForImmediateFileArgument(inputVectors))
+        else if (inputVectors[1] == "2.2" && Arguments.CheckForNoArgumentsAfter(inputVectors, 1))
         {
-            Test.RunTest3(inputVectors[2]);
+            Test.RunTest4();
         }
     }
 }
